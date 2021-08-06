@@ -24,7 +24,10 @@ public class BoardNode {
 	public List<BoardNode> getNeighbors(boolean cacheBoards){
 		ArrayList<BoardNode> neighbors = new ArrayList<>(numberOfColors);
 
+		// For every possible color change
 		for(int colorID = 0; colorID < numberOfColors; colorID++){
+			// Make a new board by changing the color
+			// It will return null if the color change does nothing
 			Board newBoard = board.colorRegion(board.getTopLeftRegion(), colorID);
 			if(newBoard != null){
 				BoardNode newBoardNode = new BoardNode(newBoard, colorID, numberOfColors);
@@ -47,6 +50,7 @@ public class BoardNode {
 		return board.getNumberOfNodes();
 	}
 
+	// These overrides are important for implementations that use sets and such
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

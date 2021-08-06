@@ -15,6 +15,7 @@ import java.util.Map;
 
 public class Main {
 	public static void main(String[] args) throws AWTException, InterruptedException {
+		// Main entry point of the program, start by fully resetting the game
 		Point gamePosition = getGamePosition();
 
 		int centerX = gamePosition.x + tilesPosition.x + ((numberOfTiles/2)*tileSize) + tileCenterSize;
@@ -26,9 +27,9 @@ public class Main {
 		click(centerX, centerY);
 		click(resetX, resetY);
 
+		// Once reset, try to solve all the difficulties from 30 to 2
 		Thread.sleep(500);
-
-		for(int i = 30; i > 10; i--){
+		for(int i = 30; i > 2; i--){
 			startSearch(i);
 			Thread.sleep(100);
 		}
@@ -59,7 +60,7 @@ public class Main {
 	public static void startSearch(int steps) throws InterruptedException, AWTException {
 		BufferedImage screenCapture = getScreenCapture();
 		Point gamePosition = getGamePosition(screenCapture);
-		// Generate set of colors
+		// Generate set of colors used in the puzzle
 		HashSet<Integer> colorSet = new HashSet<>();
 		for(int x = 0; x < numberOfTiles; x++){
 			for(int y = 0; y < numberOfTiles; y++){
@@ -72,6 +73,7 @@ public class Main {
 		}
 
 		// Generate color mappings (for faster runtime)
+		// Color RGB int to index
 		Map<Integer, Integer> rgbToColorID = new HashMap<>();
 		int i = 0;
 		for( Integer color : colorSet){
@@ -93,6 +95,7 @@ public class Main {
 		}
 
 		// Since the pink dot is a different color than the tiles, we need a little special logic
+		// Link the colors in the grid to the color buttons on the side
 		Point[] colorIDToGameCoordinate = new Point[rgbToColorID.size()];
 		Point pinkPos = null;
 		for(int x = 0; x < colorSwatchesWide; x++){
@@ -110,7 +113,6 @@ public class Main {
 				}
 			}
 		}
-
 		for (int j = 0; j < colorIDToGameCoordinate.length; j++) {
 			if(colorIDToGameCoordinate[j] == null){
 				colorIDToGameCoordinate[j] = pinkPos;
@@ -118,9 +120,11 @@ public class Main {
 			}
 		}
 
+		// Solve the puzzle
 		Board board = new Board(colorMap);
-
 		List<BoardNode> finalList = FloodSolver.solve(board, colorSet.size(), steps);
+
+		// Click the buttons to solve the puzzle
 		System.out.println(steps + " " + (finalList.size()-1));
 		for(BoardNode step : finalList){
 			if(step.clickedColor == -1){
@@ -131,6 +135,7 @@ public class Main {
 			Thread.sleep(50);
 		}
 
+		// Prepare to solve the next puzzle
 		Thread.sleep(1000);
 
 		int xPos = gamePosition.x + tilesPosition.x + ((numberOfTiles/2)*tileSize) + tileCenterSize;
@@ -145,7 +150,6 @@ public class Main {
 	}
 
 	static Robot bot;
-
 	static {
 		try {
 			bot = new Robot();
@@ -154,23 +158,25 @@ public class Main {
 		}
 	}
 
-	public static void click(Point point) {
-		click(point.x, point.y);
-	}
-
 	public static void click(int x, int y) {
 		bot.mouseMove(x, y);
 		bot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 		bot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 	}
 
+	// Get a full screenshot
 	private static BufferedImage getScreenCapture() throws AWTException {
-		// Get a full screenshot
 		Rectangle screenRect = new Rectangle(0, 0, 0, 0);
 		for (GraphicsDevice gd : GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()) {
 			screenRect = screenRect.union(gd.getDefaultConfiguration().getBounds());
 		}
 		return new Robot().createScreenCapture(screenRect);
+	}
+
+	// Get the puzzle's location on the screen
+	private static Point getGamePosition() throws AWTException {
+		BufferedImage screenCapture = getScreenCapture();
+		return getGamePosition(screenCapture);
 	}
 	private static Point getGamePosition(BufferedImage screenCapture) {
 		Point gamePosition = null;
@@ -188,9 +194,5 @@ public class Main {
 		}
 		assert gamePosition != null;
 		return gamePosition;
-	}
-	private static Point getGamePosition() throws AWTException {
-		BufferedImage screenCapture = getScreenCapture();
-		return getGamePosition(screenCapture);
 	}
 }

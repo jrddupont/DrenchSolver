@@ -16,13 +16,13 @@ public class MultithreadedGreedyDepthFirst extends Solver{
     @Override
     public List<BoardNode> solve(int steps, BoardNode node) {
         List<BoardNode> initialNodes = getInitialNodes(threads, node);
-//        List<BoardNode> initialNodes = new ArrayList<>();
-//        initialNodes.add(node);
         BoardNode endNode = startMultithreading(steps, initialNodes);
 
         return getPathFromEndNode(endNode);
     }
 
+    // Since I am lazy the way we are getting the first nodes is to generate a set
+    // of the first node's children's children (we ignore the number of threads passed)
     private static List<BoardNode> getInitialNodes(int threads, BoardNode initialNode){
         ArrayList<BoardNode> finalList = new ArrayList<>();
         for(BoardNode currentNode : initialNode.getNeighbors(false)){
@@ -38,20 +38,27 @@ public class MultithreadedGreedyDepthFirst extends Solver{
         return finalList;
     }
 
+    // Use java's method for running the same task in multiple threads
+    // The first successful solution will be used and all other threads will be killed
     private static BoardNode startMultithreading(int steps, List<BoardNode> initialNodes){
+        // Java bullshit to make a thread pool
         int poolSize = initialNodes.size();
         ExecutorService pool = Executors.newFixedThreadPool(poolSize);
         CompletionService<BoardNode> service = new ExecutorCompletionService<>(pool);
         List<Future<BoardNode>> futures = new ArrayList<>(poolSize);
         count = 1;
 
+        // Result that will be returned
         BoardNode result = null;
 
+        // Start all the threads
         try {
+            // Create the callables and put them in the pool
             for (BoardNode node : initialNodes) {
                 Callable<BoardNode> s = () -> greedyDepthFirst(steps, node);
                 futures.add(service.submit(s));
             }
+            // check each node as they finish for a successful search, if not move on to the next one
             for (int i = 0; i < poolSize; ++i) {
                 try {
                     BoardNode res = service.take().get();
@@ -62,6 +69,7 @@ public class MultithreadedGreedyDepthFirst extends Solver{
                 } catch (ExecutionException | InterruptedException ignore) {}
             }
         } finally {
+            // Once the solution has been found, kill all threads
             for (Future<BoardNode> f : futures) {
                 f.cancel(true);
             }
@@ -78,7 +86,7 @@ public class MultithreadedGreedyDepthFirst extends Solver{
         count++;
     }
 
-
+    // Same logic as Greedy Depth First
     private static BoardNode greedyDepthFirst(int steps, BoardNode node){
         printUpdate();
         if(Thread.interrupted()){

@@ -22,6 +22,8 @@ public class GreedyDepthFirst extends Solver {
         count++;
     }
 
+    // Recursive method of solving the puzzle. Basically we do a depth first search biased towards nodes that
+    // make the expanding region bigger
     private static BoardNode startGreedyDepthFirst(int steps, BoardNode node){
         count = 1;
         return greedyDepthFirst(steps, node);
@@ -29,17 +31,21 @@ public class GreedyDepthFirst extends Solver {
 
     private static BoardNode greedyDepthFirst(int steps, BoardNode node){
         printUpdate();
+        // Base case
         if(node.getNumberOfNodes() == 1){
             return node;
         }
 
+        // Prune if the path is too long
         if(node.clicksFromStart == steps){
             return null;
         }
 
+        // Get neighbors and put them in a priority queue
         PriorityQueue<BoardNode> priorityNeighbors = new PriorityQueue<>(Comparator.comparing(BoardNode::getHeuristic));
         priorityNeighbors.addAll( node.getNeighbors(false) );
 
+        // Go one by one pulling the neighbors and recursively calling this method
         while(!priorityNeighbors.isEmpty()){
             BoardNode currentNode = priorityNeighbors.poll();
 
