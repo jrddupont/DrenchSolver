@@ -14,16 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Main {
-	public Main() throws AWTException {
-	}
-
-	public static final Map<String, Long> profiler = new HashMap<>();
-	public static void updateProfiler(String tag, long startTime){
-		long time = System.currentTimeMillis() - startTime;
-		long newTime = Main.profiler.get(tag) + time;
-		Main.profiler.put(tag, newTime);
-	}
-
 	public static void main(String[] args) throws AWTException, InterruptedException {
 		Point gamePosition = getGamePosition();
 
@@ -131,6 +121,7 @@ public class Main {
 		Board board = new Board(colorMap);
 
 		List<BoardNode> finalList = FloodSolver.solve(board, colorSet.size(), steps);
+		System.out.println(steps + " " + (finalList.size()-1));
 		for(BoardNode step : finalList){
 			if(step.clickedColor == -1){
 				continue;
@@ -146,7 +137,11 @@ public class Main {
 		int yPos = gamePosition.y + tilesPosition.y + ((numberOfTiles/2)*tileSize) + tileCenterSize;
 
 		click(xPos, yPos);
-		bot.mouseMove(0,0);
+
+		int resetX = gamePosition.x + resetButtonPosition.x;
+		int resetY = gamePosition.y + resetButtonPosition.y;
+
+		bot.mouseMove(resetX,resetY);
 	}
 
 	static Robot bot;

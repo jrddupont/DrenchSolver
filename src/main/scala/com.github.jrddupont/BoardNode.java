@@ -21,7 +21,7 @@ public class BoardNode {
 		this.numberOfColors = numberOfColors;
 	}
 
-	List<BoardNode> getNeighbors(boolean cacheBoards){
+	public List<BoardNode> getNeighbors(boolean cacheBoards){
 		ArrayList<BoardNode> neighbors = new ArrayList<>(numberOfColors);
 
 		for(int colorID = 0; colorID < numberOfColors; colorID++){
